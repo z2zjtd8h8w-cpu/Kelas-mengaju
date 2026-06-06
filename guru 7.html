@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelas Mengaji — Guru</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: #1a3a2a; --g2: #2d5a40; --g3: #52b788; --gp: #d8f3dc;
+  --cream: #fdf8ee; --cream2: #f5eed8; --gold: #c9a84c; --gold2: #f0d080;
+  --text: #1c1c1c; --muted: #6b7280; --border: #e5e7eb;
+  --white: #fff; --red: #dc2626; --redp: #fee2e2;
+  --warn: #d97706; --warnp: #fef3c7; --blue: #2563eb; --bluep: #dbeafe;
+  --r: 12px; --rs: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+/* TOP BAR */
+.topbar { background: var(--g); padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+.topbar-icon { font-size: 22px; }
+.topbar-title { font-family: 'Amiri', serif; font-size: 20px; color: var(--gold2); flex: 1; }
+.topbar-badge { background: var(--g2); color: var(--g3); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; }
+.status-dot.online { background: var(--g3); box-shadow: 0 0 6px var(--g3); }
+
+/* WRAP */
+.wrap { max-width: 580px; margin: 0 auto; padding: 20px 16px 80px; }
+
+/* DATE */
+.date-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.date-chip { background: var(--gp); color: var(--g); font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; }
+
+/* TABS */
+.tabs { display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--white); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--muted); white-space: nowrap; transition: all .15s; }
+.tab.active { background: var(--g); border-color: var(--g); color: var(--white); }
+
+/* SECTION */
+.sec { display: none; }
+.sec.active { display: block; }
+
+/* STAT */
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px; }
+.stat { background: var(--white); border-radius: var(--r); padding: 14px 10px; text-align: center; border: 1px solid var(--border); }
+.stat-n { font-size: 28px; font-weight: 600; color: var(--g); }
+.stat-l { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* MURID LIST */
+.mlist { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; margin-bottom: 14px; }
+.mrow { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+.mrow:last-child { border-bottom: none; }
+.av { width: 36px; height: 36px; border-radius: 50%; background: var(--gp); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--g); flex-shrink: 0; }
+.mname { flex: 1; font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btngrp { display: flex; gap: 4px; flex-shrink: 0; }
+.abtn { padding: 4px 9px; border-radius: 6px; border: 1px solid var(--border); font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; background: transparent; color: var(--muted); transition: all .15s; }
+.abtn.hadir { background: #dcfce7; color: #16a34a; border-color: transparent; }
+.abtn.izin  { background: var(--warnp); color: var(--warn); border-color: transparent; }
+.abtn.absen { background: var(--redp); color: var(--red); border-color: transparent; }
+
+/* FORM */
+.card { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; margin-bottom: 14px; }
+.fhead { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.fhead-name { font-size: 14px; font-weight: 600; }
+.fhead-date { font-size: 11px; color: var(--muted); }
+.flabel { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.finput { width: 100%; padding: 9px 12px; border-radius: var(--rs); border: 1px solid var(--border); font-size: 13px; font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); outline: none; transition: border .15s; }
+.finput:focus { border-color: var(--g2); }
+.fgroup { margin-bottom: 12px; }
+.ngrp { display: flex; gap: 6px; }
+.nbtn { flex: 1; padding: 8px; border-radius: var(--rs); border: 1px solid var(--border); font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; background: var(--cream); color: var(--muted); transition: all .15s; }
+.nbtn.na { background: #dcfce7; color: #16a34a; border-color: transparent; }
+.nbtn.nb { background: var(--bluep); color: var(--blue); border-color: transparent; }
+.nbtn.nc { background: var(--warnp); color: var(--warn); border-color: transparent; }
+
+/* SELECT */
+.gsel { width: 100%; padding: 10px 12px; border-radius: var(--rs); border: 1px solid var(--border); font-size: 13px; font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--text); margin-bottom: 14px; outline: none; }
+
+/* RIWAYAT */
+.rlist { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; }
+.ritem { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.ritem:last-child { border-bottom: none; }
+.rtop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.rtgl { font-size: 11px; color: var(--muted); }
+.rbody { font-size: 13px; }
+.rnote { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* KODE */
+.klist { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; }
+.krow { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-bottom: 1px solid var(--border); }
+.krow:last-child { border-bottom: none; }
+.knama { font-size: 13px; font-weight: 500; }
+.kval { font-family: monospace; font-size: 12px; font-weight: 700; background: var(--cream2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px; color: var(--g); cursor: pointer; letter-spacing: .5px; user-select: all; }
+.kval:hover { background: var(--gp); }
+
+/* MGMT */
+.mgrow { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+.mgrow:last-child { border-bottom: none; }
+.mgname { flex: 1; }
+.mgname-main { font-size: 13px; font-weight: 500; }
+.mgname-kode { font-size: 11px; font-family: monospace; color: var(--muted); }
+.ibtn { width: 30px; height: 30px; border-radius: var(--rs); border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.ibtn:hover { background: var(--redp); border-color: transparent; }
+.addform { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; margin-top: 14px; }
+.addrow { display: flex; gap: 8px; align-items: flex-end; }
+.addrow .fgroup { flex: 1; margin-bottom: 0; }
+.addbtn { padding: 9px 16px; border-radius: var(--rs); border: none; background: var(--g); color: var(--white); font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; }
+.addbtn:hover { background: var(--g2); }
+
+/* SAVE BTN */
+.savebtn { width: 100%; padding: 13px; border-radius: var(--r); border: none; background: var(--g); color: var(--white); font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; }
+.savebtn:hover { background: var(--g2); }
+.savebtn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+
+/* MODAL */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
+.overlay.open { display: flex; }
+.mbox { background: var(--white); border-radius: var(--r); padding: 24px; width: 90%; max-width: 340px; }
+.mtitle { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.msub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.mbtns { display: flex; gap: 8px; margin-top: 16px; }
+.mbtns button { flex: 1; padding: 10px; border-radius: var(--rs); border: 1px solid var(--border); font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.mcancel { background: transparent; color: var(--muted); }
+.mconfirm { background: var(--red); color: var(--white); border-color: transparent; }
+.mconfirm.green { background: var(--g); }
+
+/* BADGE */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-hadir { background: #dcfce7; color: #16a34a; }
+.badge-izin { background: var(--warnp); color: var(--warn); }
+.badge-absen { background: var(--redp); color: var(--red); }
+.badge-a { background: #dcfce7; color: #16a34a; }
+.badge-b { background: var(--bluep); color: var(--blue); }
+.badge-c { background: var(--warnp); color: var(--warn); }
+.badge-- { background: var(--border); color: var(--muted); }
+
+/* INFO */
+.info { background: var(--gp); border-radius: var(--rs); padding: 10px 14px; font-size: 12px; color: var(--g); margin-bottom: 14px; line-height: 1.5; }
+.empty { font-size: 13px; color: var(--muted); padding: 16px 0; }
+
+/* NOTIF */
+.notif { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--g); color: var(--white); padding: 10px 22px; border-radius: 20px; font-size: 13px; font-weight: 500; display: none; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,.2); }
+
+/* LOADING */
+.loading { display: flex; align-items: center; justify-content: center; padding: 40px; gap: 10px; color: var(--muted); font-size: 13px; }
+
+/* REKAP BULANAN */
+.rekap-card { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
+.rekap-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.rekap-head:hover { background: var(--cream); }
+.rekap-nama { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+.rekap-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.rekap-chip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.chip-hadir { background: #dcfce7; color: #16a34a; }
+.chip-biaya { background: rgba(245,200,66,.15); color: #b45309; }
+.chip-nilai { background: var(--bluep); color: var(--blue); }
+.rekap-body { padding: 14px 16px; display: none; border-top: 1px solid var(--border); }
+.rekap-body.open { display: block; }
+.rekap-biaya-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.rekap-biaya-row:last-child { border-bottom: none; }
+.rekap-biaya-label { font-size: 12px; color: var(--muted); }
+.rekap-biaya-val { font-size: 13px; font-weight: 700; color: var(--text); }
+.rekap-biaya-input { width: 130px; padding: 6px 10px; border-radius: var(--rs); border: 1px solid var(--border); font-size: 13px; font-family: 'DM Sans',sans-serif; background: var(--cream); color: var(--text); text-align: right; outline: none; }
+.rekap-biaya-input:focus { border-color: var(--g2); }
+.rekap-laporan-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.rekap-laporan-item:last-child { border-bottom: none; }
+.rekap-laporan-tgl { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.rekap-laporan-isi { font-size: 13px; color: var(--text); }
+.rekap-total { background: var(--g); border-radius: var(--r); padding: 16px 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.rekap-total-label { font-size: 13px; color: rgba(255,255,255,.7); }
+.rekap-total-val { font-size: 22px; font-weight: 700; color: var(--gold2); }
+.simpan-tarif-btn { width: 100%; padding: 9px; border-radius: var(--rs); border: none; background: var(--g); color: var(--white); font-size: 12px; font-weight: 700; font-family: 'DM Sans',sans-serif; cursor: pointer; margin-top: 8px; }
+.spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--g2); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SETUP SCREEN */
+.setup-screen { max-width: 480px; margin: 40px auto; padding: 0 16px; }
+.setup-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); padding: 28px; }
+.setup-title { font-family: 'Amiri', serif; font-size: 22px; color: var(--g); margin-bottom: 6px; }
+.setup-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.setup-step { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--g); color: var(--white); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-text { font-size: 13px; line-height: 1.6; color: var(--text); }
+.step-text a { color: var(--g2); }
+.setup-input-wrap { margin-top: 20px; }
+.setup-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.setup-input { width: 100%; padding: 10px 12px; border-radius: var(--rs); border: 1px solid var(--border); font-size: 13px; font-family: monospace; background: var(--cream); color: var(--text); outline: none; margin-bottom: 10px; }
+.setup-input:focus { border-color: var(--g2); }
+.setup-btn { width: 100%; padding: 12px; border-radius: var(--rs); border: none; background: var(--g); color: var(--white); font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.setup-err { font-size: 12px; color: var(--red); margin-top: 6px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="screen-setup">
+  <div class="topbar">
+    <span class="topbar-icon">🕌</span>
+    <span class="topbar-title">Kelas Mengaji</span>
+    <span class="topbar-badge">Guru</span>
+  </div>
+  <div class="setup-screen">
+    <div class="setup-card">
+      <div class="setup-title">Selamat datang, Ustadz/Ustadzah!</div>
+      <div class="setup-sub">Untuk menyimpan data agar bisa diakses orang tua, kita perlu menghubungkan ke Firebase (gratis dari Google). Lakukan sekali saja.</div>
+      <div class="setup-step"><div class="step-num">1</div><div class="step-text">Buka <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → klik <strong>Add project</strong> → beri nama (misal: kelas-mengaji)</div></div>
+      <div class="setup-step"><div class="step-num">2</div><div class="step-text">Di menu kiri, klik <strong>Realtime Database</strong> → <strong>Create database</strong> → pilih lokasi Asia → pilih <strong>Start in test mode</strong></div></div>
+      <div class="setup-step"><div class="step-num">3</div><div class="step-text">Salin URL database-mu (berbentuk: <code style="background:var(--cream2);padding:1px 5px;border-radius:4px;">https://nama-project-default-rtdb.asia-southeast1.firebasedatabase.app</code>)</div></div>
+      <div class="setup-step"><div class="step-num">4</div><div class="step-text">Tempelkan URL-nya di bawah dan klik Simpan</div></div>
+      <div class="setup-input-wrap">
+        <div class="setup-label">URL Firebase Database</div>
+        <input class="setup-input" id="fb-url-input" type="text" placeholder="https://nama-project-default-rtdb...firebasedatabase.app">
+        <div class="setup-err" id="setup-err">URL tidak valid. Pastikan dimulai dengan https://</div>
+        <button class="setup-btn" onclick="simpanFirebaseUrl()">Simpan & Mulai</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="screen-app" style="display:none;">
+  <div class="topbar">
+    <span class="topbar-icon">🕌</span>
+    <span class="topbar-title">Kelas Mengaji</span>
+    <div class="status-dot" id="dot"></div>
+    <span class="topbar-badge">Guru v3</span>
+  </div>
+  <div class="wrap">
+    <div class="date-row">
+      <div class="date-chip" id="tgl"></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('absensi')">Absensi</button>
+      <button class="tab" onclick="switchTab('laporan')">Laporan</button>
+      <button class="tab" onclick="switchTab('riwayat')">Riwayat</button>
+      <button class="tab" onclick="switchTab('rekap')">Rekap Bulanan</button>
+      <button class="tab" onclick="switchTab('kode')">Kode Akses</button>
+      <button class="tab" onclick="switchTab('murid')">Kelola Murid</button>
+    </div>
+
+    <!-- ABSENSI -->
+    <div id="sec-absensi" class="sec active">
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Tanggal absensi</div>
+        <select class="gsel" id="sel-tanggal" onchange="gantiTanggal()" style="margin-bottom:0;"></select>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="jh">0</div><div class="stat-l">Hadir</div></div>
+        <div class="stat"><div class="stat-n" id="ji">0</div><div class="stat-l">Izin</div></div>
+        <div class="stat"><div class="stat-n" id="ja">0</div><div class="stat-l">Absen</div></div>
+      </div>
+      <div id="list-absensi"><div class="loading"><div class="spinner"></div>Memuat murid...</div></div>
+      <br>
+      <button class="savebtn" onclick="simpanAbsensi()">Simpan absensi</button>
+    </div>
+
+    <!-- LAPORAN -->
+    <div id="sec-laporan" class="sec">
+      <select class="gsel" id="sel-murid" onchange="muatLaporanTanggal()"></select>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Tanggal laporan</div>
+        <select class="gsel" id="sel-tgl-laporan" onchange="muatLaporanTanggal()" style="margin-bottom:0;"></select>
+      </div>
+      <div id="form-lap"></div>
+      <button class="savebtn" onclick="simpanLaporan()">Simpan laporan</button>
+    </div>
+
+    <!-- RIWAYAT -->
+    <div id="sec-riwayat" class="sec">
+      <select class="gsel" id="sel-riwayat" onchange="renderRiwayat()"></select>
+      <div id="isi-riwayat"></div>
+    </div>
+
+    <!-- REKAP BULANAN -->
+    <div id="sec-rekap" class="sec">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-end;">
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Pilih bulan</div>
+          <select class="gsel" id="sel-bulan-rekap" style="margin-bottom:0;"></select>
+        </div>
+        <button class="savebtn" style="width:auto;padding:10px 18px;font-size:13px;" onclick="renderRekap()">Tampilkan</button>
+      </div>
+      <div id="isi-rekap"></div>
+    </div>
+
+    <!-- KODE -->
+    <div id="sec-kode" class="sec">
+      <div class="info">Bagikan kode di bawah kepada orang tua. Mereka buka <strong>halaman orang tua</strong> dan masukkan kode anaknya. Klik kode untuk menyalin.</div>
+      <div id="isi-kode"></div>
+    </div>
+
+    <!-- MURID -->
+    <div id="sec-murid" class="sec">
+      <div class="info">Tambah, ubah nama, atau hapus murid. Kode akses dibuat otomatis.</div>
+
+      <!-- IMPOR DATA LAMA -->
+      <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:var(--rs);padding:14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:6px;">📦 Impor dari web lama</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Upload file <strong>data-mengaji.json</strong> yang sudah diekspor dari kelas-mengaji.html</div>
+        <input type="file" id="inp-impor" accept=".json" style="display:none" onchange="imporData(event)">
+        <button class="addbtn" style="background:var(--orange);width:100%;" onclick="document.getElementById('inp-impor').click()">📂 Pilih file data-mengaji.json</button>
+        <div id="impor-status" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+
+      <div class="mlist" id="mgmt-list"></div>
+      <div class="addform">
+        <div class="flabel" style="margin-bottom:10px;">Tambah murid baru</div>
+        <div class="addrow">
+          <div class="fgroup">
+            <input class="finput" id="inp-nama" type="text" placeholder="Nama lengkap murid" onkeydown="if(event.key==='Enter')tambah()">
+          </div>
+          <button class="addbtn" onclick="tambah()">Tambah</button>
+        </div>
+        <div id="add-err" style="font-size:12px;color:var(--red);margin-top:6px;display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HAPUS -->
+<div class="overlay" id="mod-hapus">
+  <div class="mbox">
+    <div class="mtitle">Hapus murid ini?</div>
+    <div class="msub">Semua data absensi dan laporan murid ini juga akan dihapus.</div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="tutupMod()">Batal</button>
+      <button class="mconfirm" onclick="konfirmHapus()">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="overlay" id="mod-edit">
+  <div class="mbox">
+    <div class="mtitle">Ubah nama murid</div>
+    <div class="fgroup" style="margin-bottom:0;">
+      <input class="finput" id="edit-inp" type="text" onkeydown="if(event.key==='Enter')konfirmEdit()">
+    </div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="tutupMod()">Batal</button>
+      <button class="mconfirm green" onclick="konfirmEdit()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ===== FIREBASE =====
+let FB_URL = localStorage.getItem('km_fb_url') || 'https://kelasmengajiqu-default-rtdb.asia-southeast1.firebasedatabase.app';
+let muridList = [];
+let statusAbsen = {};
+let nilaiPilih = {};
+let hapusId = null, editId = null;
+
+function db(path) { return FB_URL + path + '.json'; }
+
+async function fbGet(path) {
+  const r = await fetch(db(path));
+  return r.ok ? r.json() : null;
+}
+async function fbSet(path, data) {
+  return fetch(db(path), { method: 'PUT', body: JSON.stringify(data) });
+}
+async function fbPush(path, data) {
+  return fetch(db(path), { method: 'POST', body: JSON.stringify(data) });
+}
+async function fbDelete(path) {
+  return fetch(db(path), { method: 'DELETE' });
+}
+
+function setOnline(v) {
+  document.getElementById('dot').className = 'status-dot' + (v ? ' online' : '');
+}
+
+// ===== SETUP =====
+function simpanFirebaseUrl() {
+  const val = document.getElementById('fb-url-input').value.trim().replace(/\/$/, '');
+  const err = document.getElementById('setup-err');
+  if (!val.startsWith('https://')) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  localStorage.setItem('km_fb_url', val);
+  FB_URL = val;
+  document.getElementById('screen-setup').style.display = 'none';
+  document.getElementById('screen-app').style.display = 'block';
+  init();
+}
+
+// ===== INIT =====
+function inisial(n) { return n.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function todayStr() { return new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function buatKode(n) {
+  const k = n.trim().split(' ')[0].toUpperCase().replace(/[^A-Z]/g,'') + new Date().getFullYear();
+  return k;
+}
+
+let selectedTanggal = '';
+
+async function init() {
+  selectedTanggal = todayKey();
+  document.getElementById('tgl').textContent = todayStr();
+  renderPilihTanggal();
+  await muatMurid();
+  await muatAbsensiTanggal();
+  renderSelects();
+  renderPilihTglLaporan();
+  muatLaporanTanggal();
+}
+
+function renderPilihTanggal() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const todayK = todayKey();
+  const hariNama = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const blnNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const opts = [];
+  for (let d = 1; d <= today.getDate(); d++) {
+    const date = new Date(year, month, d);
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const dd = String(date.getDate()).padStart(2,'0');
+    const key = `${y}-${m}-${dd}`;
+    const label = `${hariNama[date.getDay()]}, ${d} ${blnNama[date.getMonth()]}`;
+    opts.push(`<option value="${key}" ${key===selectedTanggal?'selected':''}>${label}${key===todayK?' (Hari ini)':''}</option>`);
+  }
+  document.getElementById('sel-tanggal').innerHTML = opts.reverse().join('');
+}
+
+async function gantiTanggal() {
+  selectedTanggal = document.getElementById('sel-tanggal').value;
+  statusAbsen = {};
+  await muatAbsensiTanggal();
+}
+
+async function muatAbsensiTanggal() {
+  try {
+    const data = await fbGet(`/absensi/${selectedTanggal}`);
+    statusAbsen = data || {};
+    renderAbsensi();
+  } catch(e) { renderAbsensi(); }
+}
+
+async function muatMurid() {
+  try {
+    const data = await fbGet('/murid');
+    muridList = data ? Object.entries(data).map(([id,v])=>({id,...v})) : [];
+    setOnline(true);
+  } catch(e) { setOnline(false); muridList = []; }
+}
+
+// ===== ABSENSI =====
+function renderAbsensi() {
+  const el = document.getElementById('list-absensi');
+  if (!muridList.length) { el.innerHTML = `<div class="mlist"><div style="padding:16px;"><p class="empty">Belum ada murid. Tambahkan di tab "Kelola Murid".</p></div></div>`; updateStat(); return; }
+  el.innerHTML = `<div class="mlist">${muridList.map(m => {
+    const st = statusAbsen[m.id] || '';
+    return `<div class="mrow">
+      <div class="av">${inisial(m.nama)}</div>
+      <div class="mname">${m.nama}</div>
+      <div class="btngrp">
+        <button class="abtn ${st==='hadir'?'hadir':''}" onclick="setSt('${m.id}','hadir')">Hadir</button>
+        <button class="abtn ${st==='izin'?'izin':''}" onclick="setSt('${m.id}','izin')">Izin</button>
+        <button class="abtn ${st==='absen'?'absen':''}" onclick="setSt('${m.id}','absen')">Absen</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+  updateStat();
+}
+
+function setSt(id, st) { statusAbsen[id] = statusAbsen[id]===st?'':st; renderAbsensi(); }
+
+function updateStat() {
+  const vals = Object.values(statusAbsen);
+  document.getElementById('jh').textContent = vals.filter(s=>s==='hadir').length;
+  document.getElementById('ji').textContent = vals.filter(s=>s==='izin').length;
+  document.getElementById('ja').textContent = vals.filter(s=>s==='absen').length;
+}
+
+async function simpanAbsensi() {
+  if (!muridList.length) { notif('Belum ada murid!'); return; }
+  try {
+    await fbSet(`/absensi/${selectedTanggal}`, statusAbsen);
+    notif('Absensi tersimpan!');
+  } catch(e) { notif('Gagal menyimpan. Cek koneksi.'); }
+}
+
+// ===== LAPORAN =====
+function renderSelects() {
+  const opts = muridList.length ? muridList.map(m=>`<option value="${m.id}">${m.nama}</option>`).join('') : '<option value="">— Belum ada murid —</option>';
+  document.getElementById('sel-murid').innerHTML = opts;
+  document.getElementById('sel-riwayat').innerHTML = opts;
+}
+
+function renderPilihTglLaporan() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const todayK = todayKey();
+  const hariNama = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const blnNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const opts = [];
+  for (let d = 1; d <= today.getDate(); d++) {
+    const date = new Date(year, month, d);
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const dd = String(date.getDate()).padStart(2,'0');
+    const key = `${y}-${m}-${dd}`;
+    const label = `${hariNama[date.getDay()]}, ${d} ${blnNama[date.getMonth()]}`;
+    opts.push(`<option value="${key}">${label}${key===todayK?' (Hari ini)':''}</option>`);
+  }
+  document.getElementById('sel-tgl-laporan').innerHTML = opts.reverse().join('');
+}
+
+async function muatLaporanTanggal() {
+  const id = document.getElementById('sel-murid').value;
+  const tgl = document.getElementById('sel-tgl-laporan').value;
+  if (!id || !tgl) return;
+  try {
+    const data = await fbGet(`/laporan/${id}/${tgl}`);
+    if (data) {
+      nilaiPilih[id] = data.nilai || '';
+      renderForm(data.surat || '', data.hafalan || '', data.tambahan || '', tgl);
+    } else {
+      nilaiPilih[id] = '';
+      renderForm('', '', '', tgl);
+    }
+  } catch(e) { renderForm('', '', '', tgl); }
+}
+
+function renderForm(suratVal='', hafalanVal='', tambahanVal='', tgl='') {
+  const el = document.getElementById('form-lap');
+  if (!muridList.length) { el.innerHTML = `<div class="card"><p class="empty">Belum ada murid. Tambahkan di tab "Kelola Murid".</p></div>`; return; }
+  const id = document.getElementById('sel-murid').value;
+  const m = muridList.find(x=>x.id===id);
+  if (!m) return;
+  const cur = nilaiPilih[id] || '';
+  const hariNama = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const blnNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  let tglLabel;
+  if (tgl) {
+    const [ty, tm, td] = tgl.split('-').map(Number);
+    const tglObj = new Date(ty, tm-1, td);
+    tglLabel = `${hariNama[tglObj.getDay()]}, ${td} ${blnNama[tm-1]} ${ty}`;
+  } else {
+    tglLabel = todayStr();
+  }
+  el.innerHTML = `<div class="card">
+    <div class="fhead">
+      <div class="av">${inisial(m.nama)}</div>
+      <div><div class="fhead-name">${m.nama}</div><div class="fhead-date">${tglLabel}</div></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Penilaian bacaan</div>
+      <div class="ngrp">
+        <button class="nbtn ${cur==='A'?'na':''}" onclick="setNilai('${id}','A')">A — Bagus</button>
+        <button class="nbtn ${cur==='B'?'nb':''}" onclick="setNilai('${id}','B')">B — Cukup</button>
+        <button class="nbtn ${cur==='C'?'nc':''}" onclick="setNilai('${id}','C')">C — Perlu latihan</button>
+      </div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">📖 Batas mengaji</div>
+      <input class="finput" id="inp-surat" type="text" placeholder="Contoh: Al-Baqarah hal 23" value="${suratVal}">
+    </div>
+    <div class="fgroup">
+      <div class="flabel">🧠 Batas hafalan</div>
+      <input class="finput" id="inp-hafalan" type="text" placeholder="Contoh: Surat Al-Ikhlas" value="${hafalanVal}">
+    </div>
+    <div class="fgroup">
+      <div class="flabel">➕ Pelajaran tambahan</div>
+      <input class="finput" id="inp-tambahan" type="text" placeholder="Contoh: Tajwid mad, doa makan" value="${tambahanVal}">
+    </div>
+  </div>`;
+}
+
+function setNilai(id, val) {
+  nilaiPilih[id] = nilaiPilih[id]===val?'':val;
+  const tgl = document.getElementById('sel-tgl-laporan')?.value||'';
+  renderForm(
+    document.getElementById('inp-surat')?.value||'',
+    document.getElementById('inp-hafalan')?.value||'',
+    document.getElementById('inp-tambahan')?.value||'',
+    tgl
+  );
+  document.getElementById('sel-murid').value=id;
+}
+
+async function simpanLaporan() {
+  if (!muridList.length) { notif('Belum ada murid!'); return; }
+  const id = document.getElementById('sel-murid').value;
+  if (!id) { notif('Pilih murid dulu!'); return; }
+  const tgl = document.getElementById('sel-tgl-laporan')?.value || todayKey();
+  const surat = document.getElementById('inp-surat')?.value || '';
+  const hafalan = document.getElementById('inp-hafalan')?.value || '';
+  const tambahan = document.getElementById('inp-tambahan')?.value || '';
+  const nilai = nilaiPilih[id] || '-';
+  try {
+    await fbSet(`/laporan/${id}/${tgl}`, {surat, hafalan, tambahan, nilai, tgl});
+    notif('Laporan tersimpan!');
+  } catch(e) { notif('Gagal menyimpan. Cek koneksi.'); }
+}
+
+// ===== RIWAYAT =====
+async function renderRiwayat() {
+  const id = document.getElementById('sel-riwayat').value;
+  const el = document.getElementById('isi-riwayat');
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>Memuat...</div>`;
+  try {
+    const [lapData, absData] = await Promise.all([fbGet(`/laporan/${id}`), fbGet('/absensi')]);
+    const laps = lapData ? Object.values(lapData).sort((a,b)=>b.tgl.localeCompare(a.tgl)) : [];
+    if (!laps.length) { el.innerHTML=`<div class="rlist"><div style="padding:16px;"><p class="empty">Belum ada laporan.</p></div></div>`; return; }
+    el.innerHTML = `<div class="rlist">${laps.map(r=>{
+      const st = absData && absData[r.tgl] ? absData[r.tgl][id] : '';
+      return `<div class="ritem">
+        <div class="rtop">
+          <span class="rtgl">${r.tgl}</span>
+          <div style="display:flex;gap:4px;">${st?`<span class="badge badge-${st}">${st}</span>`:''}<span class="badge badge-${(r.nilai||'-').toLowerCase()}">${r.nilai}</span></div>
+        </div>
+        ${r.surat?`<div class="rbody">📖 ${r.surat}</div>`:''}
+        ${r.hafalan?`<div class="rnote">🧠 ${r.hafalan}</div>`:''}
+        ${r.tambahan?`<div class="rnote">➕ ${r.tambahan}</div>`:''}
+        ${r.catatan?`<div class="rnote">💬 ${r.catatan}</div>`:''}
+      </div>`;
+    }).join('')}</div>`;
+  } catch(e) { el.innerHTML=`<div class="rlist"><div style="padding:16px;"><p class="empty">Gagal memuat data.</p></div></div>`; }
+}
+
+// ===== KODE =====
+function renderKode() {
+  const el = document.getElementById('isi-kode');
+  if (!muridList.length) { el.innerHTML=`<div class="klist"><div style="padding:16px;"><p class="empty">Belum ada murid.</p></div></div>`; return; }
+  el.innerHTML = `<div class="klist">${muridList.map(m=>`
+    <div class="krow">
+      <span class="knama">${m.nama}</span>
+      <span class="kval" onclick="navigator.clipboard.writeText('${m.kode}');notif('Kode disalin!')">${m.kode}</span>
+    </div>`).join('')}</div>`;
+}
+
+// ===== KELOLA MURID =====
+function renderMgmt() {
+  const el = document.getElementById('mgmt-list');
+  if (!muridList.length) { el.innerHTML=`<div style="padding:16px;"><p class="empty">Belum ada murid. Tambahkan di bawah.</p></div>`; return; }
+  el.innerHTML = muridList.map(m=>`
+    <div class="mgrow">
+      <div class="av">${inisial(m.nama)}</div>
+      <div class="mgname">
+        <div class="mgname-main">${m.nama}</div>
+        <div class="mgname-kode">${m.kode}</div>
+      </div>
+      <button class="ibtn" onclick="bukaEdit('${m.id}','${m.nama.replace(/'/g,"\\'")}')">✏️</button>
+      <button class="ibtn" onclick="bukaHapus('${m.id}')">🗑️</button>
+    </div>`).join('');
+}
+
+async function tambah() {
+  const inp = document.getElementById('inp-nama');
+  const err = document.getElementById('add-err');
+  const nama = inp.value.trim();
+  if (!nama) { err.textContent='Nama tidak boleh kosong.'; err.style.display='block'; return; }
+  if (muridList.find(m=>m.nama.toLowerCase()===nama.toLowerCase())) { err.textContent='Nama murid sudah ada.'; err.style.display='block'; return; }
+  err.style.display='none';
+  let kode = buatKode(nama);
+  let n=2; while(muridList.find(m=>m.kode===kode)) kode=buatKode(nama)+n++;
+  try {
+    const r = await fbPush('/murid', {nama, kode});
+    const {name: id} = await r.json();
+    muridList.push({id, nama, kode});
+    inp.value='';
+    renderMgmt(); renderAbsensi(); renderSelects(); renderForm();
+    notif(`${nama} ditambahkan!`);
+  } catch(e) { notif('Gagal menyimpan. Cek koneksi.'); }
+}
+
+function bukaHapus(id) { hapusId=id; document.getElementById('mod-hapus').classList.add('open'); }
+function bukaEdit(id,nama) { editId=id; document.getElementById('edit-inp').value=nama; document.getElementById('mod-edit').classList.add('open'); setTimeout(()=>document.getElementById('edit-inp').focus(),100); }
+function tutupMod() { hapusId=editId=null; document.getElementById('mod-hapus').classList.remove('open'); document.getElementById('mod-edit').classList.remove('open'); }
+
+async function konfirmHapus() {
+  if(!hapusId) return;
+  try {
+    await Promise.all([fbDelete(`/murid/${hapusId}`), fbDelete(`/laporan/${hapusId}`)]);
+    muridList = muridList.filter(m=>m.id!==hapusId);
+    delete statusAbsen[hapusId]; delete nilaiPilih[hapusId];
+    tutupMod(); renderMgmt(); renderAbsensi(); renderSelects(); renderForm();
+    notif('Murid dihapus.');
+  } catch(e) { notif('Gagal menghapus.'); }
+}
+
+async function konfirmEdit() {
+  if(!editId) return;
+  const nama = document.getElementById('edit-inp').value.trim();
+  if(!nama) return;
+  const kode = buatKode(nama);
+  try {
+    await fbSet(`/murid/${editId}`, {nama, kode});
+    const m = muridList.find(x=>x.id===editId);
+    if(m) { m.nama=nama; m.kode=kode; }
+    tutupMod(); renderMgmt(); renderAbsensi(); renderSelects(); renderForm();
+    notif('Nama diperbarui!');
+  } catch(e) { notif('Gagal menyimpan.'); }
+}
+
+// ===== TABS =====
+function switchTab(tab) {
+  const tabs = ['absensi','laporan','riwayat','rekap','kode','murid'];
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',tabs[i]===tab));
+  tabs.forEach(t=>document.getElementById('sec-'+t).classList.toggle('active',t===tab));
+  if(tab==='riwayat') renderRiwayat();
+  if(tab==='kode') renderKode();
+  if(tab==='laporan') { renderSelects(); renderPilihTglLaporan(); muatLaporanTanggal(); }
+  if(tab==='murid') renderMgmt();
+  if(tab==='rekap') { renderPilihBulan(); renderRekap(); }
+}
+
+// ===== NOTIF =====
+function notif(msg) {
+  const el=document.getElementById('notif'); el.textContent=msg; el.style.display='block';
+  setTimeout(()=>el.style.display='none',2000);
+}
+
+// ===== REKAP BULANAN =====
+function renderPilihBulan() {
+  const today = new Date();
+  const nm = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const opts = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const val = `${y}-${m}`;
+    const label = `${nm[d.getMonth()]} ${y}`;
+    opts.push(`<option value="${val}">${label}</option>`);
+  }
+  document.getElementById('sel-bulan-rekap').innerHTML = opts.join('');
+}
+
+async function renderRekap() {
+  const bulan = document.getElementById('sel-bulan-rekap').value;
+  const el = document.getElementById('isi-rekap');
+  if (!muridList.length) { el.innerHTML=`<div class="card"><p class="empty">Belum ada murid.</p></div>`; return; }
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>Memuat rekap...</div>`;
+
+  try {
+    const [absData, lapData, tarifData] = await Promise.all([
+      fbGet('/absensi'),
+      fbGet('/laporan'),
+      fbGet('/tarif')
+    ]);
+
+    // Filter absensi bulan ini
+    const absBulan = {};
+    if (absData) {
+      Object.entries(absData).forEach(([tgl, data]) => {
+        if (tgl.startsWith(bulan)) absBulan[tgl] = data;
+      });
+    }
+
+    // Debug: cek format data absensi
+    console.log('absBulan:', JSON.stringify(absBulan).slice(0,300));
+    console.log('muridList ids:', muridList.map(m=>m.id));
+
+    // Hitung total biaya semua murid
+    // Support dua format: {firebaseId: status} dan {index: status}
+    let grandTotal = 0;
+    const tarifSimpan = tarifData || {};
+    muridList.forEach((m, idx) => {
+      const tarif = tarifSimpan[m.id] || 0;
+      const hadir = Object.values(absBulan).filter(d => {
+        // Coba dengan firebase id dulu
+        if (d[m.id] === 'hadir') return true;
+        // Coba dengan index (format lama)
+        if (d[String(idx)] === 'hadir') return true;
+        return false;
+      }).length;
+      grandTotal += tarif * hadir;
+    });
+
+    // Tampilkan grand total - fix Safari date parsing
+    const [thn, bln2] = bulan.split('-');
+    const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const bulanLabel = namaBulan[parseInt(bln2, 10) - 1] + ' ' + thn;
+    el.innerHTML = `
+      <div class="rekap-total">
+        <div>
+          <div class="rekap-total-label">Total tagihan</div>
+          <div class="rekap-total-label">${bulanLabel}</div>
+        </div>
+        <div class="rekap-total-val">Rp ${grandTotal.toLocaleString('id-ID')}</div>
+      </div>
+      ${muridList.map((m, idx) => {
+        const tarif = tarifSimpan[m.id] || 0;
+        const cekStatus = (d, status) => d[m.id]===status || d[String(idx)]===status;
+        const hadir = Object.values(absBulan).filter(d=>cekStatus(d,'hadir')).length;
+        const izin = Object.values(absBulan).filter(d=>cekStatus(d,'izin')).length;
+        const absen = Object.values(absBulan).filter(d=>cekStatus(d,'absen')).length;
+        const total = tarif * hadir;
+
+        // Ambil laporan bulan ini
+        const lapMurid = lapData && lapData[m.id]
+          ? Object.values(lapData[m.id]).filter(l=>l.tgl&&l.tgl.startsWith(bulan)).sort((a,b)=>b.tgl.localeCompare(a.tgl))
+          : [];
+
+        // Rata-rata nilai
+        const nilaiList = lapMurid.map(l=>l.nilai).filter(n=>n&&n!=='-');
+        const nilaiMap = {A:3,B:2,C:1};
+        const rataNum = nilaiList.length ? nilaiList.reduce((s,n)=>s+(nilaiMap[n]||0),0)/nilaiList.length : 0;
+        const rataLabel = rataNum>=2.5?'A':rataNum>=1.5?'B':rataNum>0?'C':'—';
+
+        return `<div class="rekap-card">
+          <div class="rekap-head" onclick="toggleRekap('rb-${m.id}')">
+            <div class="av">${inisial(m.nama)}</div>
+            <div class="rekap-nama">${m.nama}</div>
+            <div class="rekap-chips">
+              <span class="rekap-chip chip-hadir">✅ ${hadir}x hadir</span>
+              ${izin?`<span class="rekap-chip" style="background:var(--warnp);color:var(--warn);">🟡 ${izin}x izin</span>`:''}
+              ${absen?`<span class="rekap-chip" style="background:var(--redp);color:var(--red);">❌ ${absen}x absen</span>`:''}
+              ${rataLabel!=='—'?`<span class="rekap-chip chip-nilai">📖 Nilai ${rataLabel}</span>`:''}
+              <span class="rekap-chip chip-biaya">💰 Rp ${total.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+          <div class="rekap-body" id="rb-${m.id}">
+            <div class="rekap-biaya-row">
+              <span class="rekap-biaya-label">Tarif per pertemuan</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;color:var(--muted);">Rp</span>
+                <input class="rekap-biaya-input" id="tarif-${m.id}" type="number" value="${tarif}" placeholder="0" min="0" step="1000">
+              </div>
+            </div>
+            <div class="rekap-biaya-row">
+              <span class="rekap-biaya-label">Jumlah pertemuan (hadir)</span>
+              <span class="rekap-biaya-val">${hadir} kali</span>
+            </div>
+            <div class="rekap-biaya-row">
+              <span class="rekap-biaya-label">Total biaya bulan ini</span>
+              <span class="rekap-biaya-val" style="color:var(--g2);">Rp ${total.toLocaleString('id-ID')}</span>
+            </div>
+            <button class="simpan-tarif-btn" onclick="simpanTarif('${m.id}')">Simpan tarif</button>
+
+            ${lapMurid.length ? `
+            <div style="margin-top:14px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Hasil belajar bulan ini</div>
+            ${lapMurid.map(l=>{
+              const [y,m,d] = l.tgl.split('-');
+              const nmBln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+              const tglFmt = `${parseInt(d)} ${nmBln[parseInt(m)-1]}`;
+              return `<div class="rekap-laporan-item">
+                <div class="rekap-laporan-tgl">${tglFmt} — <span class="badge badge-${(l.nilai||'-').toLowerCase()}">${l.nilai||'-'}</span></div>
+                ${l.surat?`<div class="rekap-laporan-isi">📖 ${l.surat}</div>`:''}
+                ${l.hafalan?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">🧠 ${l.hafalan}</div>`:''}
+                ${l.tambahan?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">➕ ${l.tambahan}</div>`:''}
+              </div>`;
+            }).join('')}` : `<div style="font-size:12px;color:var(--muted);margin-top:12px;">Belum ada laporan bulan ini.</div>`}
+          </div>
+        </div>`;
+      }).join('')}`;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p class="empty">Gagal memuat data. Cek koneksi.</p></div>`;
+  }
+}
+
+function toggleRekap(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+async function simpanTarif(muridId) {
+  const tarif = parseInt(document.getElementById('tarif-'+muridId).value) || 0;
+  try {
+    await fbSet(`/tarif/${muridId}`, tarif);
+    notif('Tarif tersimpan!');
+    renderRekap();
+  } catch(e) { notif('Gagal menyimpan.'); }
+}
+
+// ===== IMPOR DATA LAMA =====
+async function imporData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('impor-status');
+  status.style.display = 'block';
+  status.style.color = 'var(--muted)';
+  status.textContent = '⏳ Sedang memproses...';
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.murid || !Array.isArray(data.murid)) throw new Error('Format file tidak valid');
+
+    let muridBerhasil = 0, laporanBerhasil = 0, absensiBerhasil = 0;
+
+    // Upload murid
+    for (const m of data.murid) {
+      if (!m.nama) continue;
+      // Cek apakah sudah ada
+      const sudahAda = muridList.find(x => x.nama.toLowerCase() === m.nama.toLowerCase());
+      if (!sudahAda) {
+        const r = await fbPush('/murid', {nama: m.nama, kode: m.kode || buatKode(m.nama)});
+        const {name: id} = await r.json();
+        muridList.push({id, nama: m.nama, kode: m.kode});
+        muridBerhasil++;
+      }
+    }
+
+    // Upload absensi & laporan dari riwayat
+    if (data.riwayat && Array.isArray(data.riwayat)) {
+      // Ambil absensi
+      const absensiEntries = data.riwayat.filter(r => r.jenis === 'absensi');
+      for (const entry of absensiEntries) {
+        // Konversi index ke murid id
+        const absensiPerMurid = {};
+        Object.entries(entry.data || {}).forEach(([idx, st]) => {
+          const m = data.murid[parseInt(idx)];
+          if (!m) return;
+          const found = muridList.find(x => x.nama.toLowerCase() === m.nama.toLowerCase());
+          if (found && st) absensiPerMurid[found.id] = st;
+        });
+        if (Object.keys(absensiPerMurid).length) {
+          await fbSet(`/absensi/${entry.tanggal}`, absensiPerMurid);
+          absensiBerhasil++;
+        }
+      }
+
+      // Ambil laporan
+      const laporanEntries = data.riwayat.filter(r => r.jenis === 'laporan');
+      for (const entry of laporanEntries) {
+        const m = data.murid[entry.murid];
+        if (!m) continue;
+        const found = muridList.find(x => x.nama.toLowerCase() === m.nama.toLowerCase());
+        if (!found) continue;
+        await fbSet(`/laporan/${found.id}/${entry.tanggal}`, {
+          surat: entry.surat || '',
+          catatan: entry.catatan || '',
+          nilai: entry.nilai || '-',
+          tgl: entry.tanggal
+        });
+        laporanBerhasil++;
+      }
+    }
+
+    await muatMurid();
+    renderMgmt(); renderAbsensi(); renderSelects();
+    status.style.color = 'var(--g3)';
+    status.textContent = `✅ Berhasil! ${muridBerhasil} murid, ${absensiBerhasil} absensi, ${laporanBerhasil} laporan diimpor ke Firebase.`;
+    notif('Data berhasil diimpor!');
+  } catch(e) {
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ Gagal: ' + e.message;
+  }
+  event.target.value = '';
+}
+
+// ===== START =====
+document.getElementById('screen-setup').style.display='none';
+document.getElementById('screen-app').style.display='block';
+init();
+</script>
+</body>
+</html>
